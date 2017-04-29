@@ -18,9 +18,11 @@ class Dataset(object):
         
     def next_record(self):
         self._next_file = self._get_next_file()
+        f = self._file_dict[self._next_file]
         try:
-            result = self._file_dict[self._next_file].next()
+            result = f.next()
         except StopIteration:
+            f.close()
             self._file_dict[self._next_file] = open(self._next_file, 'r')
             result = self._file_dict[self._next_file].next()
         return self._next_file, result
