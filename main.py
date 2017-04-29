@@ -217,7 +217,5 @@ def main():
         train_accuracy = accuracy.eval(session = sess, feed_dict = feed_dict)
         print("step %d, training accuracy %g"%(i, train_accuracy))
         train_step.run(session = sess, feed_dict = feed_dict)
-        
-    #print("test accuracy %g"%accuracy.eval(feed_dict={x: test_feature_tensors, y: test_target_vectors}))
 
     sess.close()
