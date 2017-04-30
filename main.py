@@ -26,6 +26,7 @@ CONV_FILTER_SIZE_B = 3
 CONV_OUT_NUM_FEATS = 512
 POOL_SIZE = 4
 CONN_NUM_FEATS = 512
+DROPOUT_PROB = .5
 
 #These should probably be determined
 CHAR_SET_SIZE = len(CHAR_SET)
@@ -39,6 +40,7 @@ def main():
 
     x = tf.placeholder(tf.float32, shape = [BATCH_SIZE, INPUT_WIDTH, CHAR_SET_SIZE])
     y = tf.placeholder(tf.float32, shape = [BATCH_SIZE, NUM_LABELS])
+    dropout_prob = tf.placeholder(tf.float32)
 
     out0 = x
 
@@ -155,8 +157,10 @@ def main():
 
     thresh_bias_conn_1 = bias_variables([CONN_NUM_FEATS])
     thresh_conn_1 = tf.nn.relu(conn_1 + thresh_bias_conn_1)
-    #[BATCH_SIZE, CONN_NUM_FEATS]    
-    out3 = thresh_conn_1
+
+    drop_1 = tf.nn.dropout(thresh_conn_1, dropout_prob)
+
+    out3 = drop_1
 
 
     #(4)  Second connected layer
@@ -169,8 +173,10 @@ def main():
 
     thresh_bias_conn_2 = bias_variables([CONN_NUM_FEATS])
     thresh_conn_2 = tf.nn.relu(conn_2 + thresh_bias_conn_2)
-    #[BATCH_SIZE, CONN_NUM_FEATS]
-    out4 = thresh_conn_2
+
+    drop_2 = tf.nn.dropout(thresh_conn_2, dropout_prob)
+
+    out4 = drop_2
 
 
     #(5) Readout layer
@@ -212,10 +218,11 @@ def main():
                                                            sent_max_len = INPUT_WIDTH) for line in lines]
         label_batch = np.array(label_batch_list)
         feature_batch = np.array(feature_batch_list)
-        feed_dict =  {x: feature_batch, y: label_batch}
+        eval_dict =  {x: feature_batch, y: label_batch, dropout_prob: 1.}
+        train_dict = {x: feature_batch, y: label_batch, dropout_prob: DROPOUT_PROB}
 
-        train_accuracy = accuracy.eval(session = sess, feed_dict = feed_dict)
+        train_accuracy = accuracy.eval(session = sess, feed_dict = eval_dict)
         print("step %d, training accuracy %g"%(i, train_accuracy))
-        train_step.run(session = sess, feed_dict = feed_dict)
+        train_step.run(session = sess, feed_dict = train_dict)
 
     sess.close()
