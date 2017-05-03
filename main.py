@@ -1,26 +1,36 @@
+from __future__ import division, print_function
 import numpy as np
 import nltk
 import tensorflow as tf
-from preprocessing import pp1, get_data_array_from_sent, get_label_from_pathname,\
-    get_label_array_from_pathname
-from utilities import weight_variables, bias_variables, conv, pool, default_char_set, one_hot
 import os
-from dataset import Dataset
-#from future import division, print_function
+import csv
+
+from utilities import weight_variables, bias_variables, conv, pool, default_char_set, one_hot
+
+#for amazon dataset
+from utilities import amazon_polarity_labels, str2featarr_am1, str2lab_am1
 
 
 #Set these
-DATA_DIRECTORY = "./guten_data/"
 CHAR_SET = default_char_set
-PATHNAME_TO_LABEL_MAPPER = get_label_from_pathname
-INPUT_WIDTH = 512
-PREPROCESSOR = pp1
 ###
+
+#ONE OF THE FOLLOWING MUST BE SET
+DATA_FILE = "./data/amazon_polarity/train.csv"
+LABEL_INDEX = 0
+TEXT_INDEX = 2
+STRING_TO_LABEL = str2lab_am1
+STRING_TO_FEATURE_ARRAY = str2featarr_am1
+ALL_LABELS = amazon_polarity_labels
+
+### OPTIMIZATION 
 BATCH_SIZE = 128
 STEP_SIZE = .01 #orig paper halved this every 3 epochs for 10 times
 MOMENTUM = .9
-NUM_ITERS = 2000
-###
+NUM_ITERS = 30000
+
+### MODEL PARAMETERS
+INPUT_WIDTH = 512
 CONV_FILTER_SIZE_A = 7
 CONV_FILTER_SIZE_B = 3
 CONV_OUT_NUM_FEATS = 512
@@ -28,13 +38,11 @@ POOL_SIZE = 4
 CONN_NUM_FEATS = 512
 DROPOUT_PROB = .5
 
-#These should probably be determined
-CHAR_SET_SIZE = len(CHAR_SET)
-ALL_LABELS =  [PATHNAME_TO_LABEL_MAPPER(DATA_DIRECTORY + filename) for\
-                   filename in os.listdir(DATA_DIRECTORY)]
-NUM_LABELS = len(ALL_LABELS)
 
 def main():
+
+    CHAR_SET_SIZE = len(CHAR_SET)
+    NUM_LABELS = len(ALL_LABELS)
 
     #(0) Placeholders
 
@@ -206,16 +214,33 @@ def main():
 
     sess.run(tf.global_variables_initializer())
 
-    data = Dataset(DATA_DIRECTORY)
+    train_data_file = open(DATA_FILE, 'r')
+    csv_reader = csv.reader(train_data_file)
 
     for i in range(NUM_ITERS):
 
-        pathnames, lines = data.next_batch(BATCH_SIZE)
+        label_batch_list = list()
+        feature_batch_list = list()
 
-        label_batch_list = [get_label_array_from_pathname(pathname, ALL_LABELS) for pathname in pathnames]
-        feature_batch_list = [get_data_array_from_sent(line, char_set = CHAR_SET,\
-                                                           preprocessor = PREPROCESSOR,\
-                                                           sent_max_len = INPUT_WIDTH) for line in lines]
+        #Get next batch
+
+        for _ in range(BATCH_SIZE):
+
+            try:
+                next_list = csv_reader.next()
+
+            except StopIteration:
+                train_data_file.close()
+                train_data_file = open(DATA_FILE, 'r')
+                csv_reader = csv.reader(train_data_file)
+                next_list = csv_reader.next()
+
+            label_batch_list.append(next_list[LABEL_INDEX])
+            feature_batch_list.append(next_list[TEXT_INDEX])
+
+        label_batch_list = [one_hot(STRING_TO_LABEL(s), ALL_LABELS) for s in label_batch_list]
+        feature_batch_list = [STRING_TO_FEATURE_ARRAY(s, CHAR_SET, INPUT_WIDTH) for s in feature_batch_list]
+
         label_batch = np.array(label_batch_list)
         feature_batch = np.array(feature_batch_list)
         eval_dict =  {x: feature_batch, y: label_batch, dropout_prob: 1.}
@@ -224,5 +249,6 @@ def main():
         train_accuracy = accuracy.eval(session = sess, feed_dict = eval_dict)
         print("step %d, training accuracy %g"%(i, train_accuracy))
         train_step.run(session = sess, feed_dict = train_dict)
+
 
     sess.close()
