@@ -22,10 +22,7 @@ TEXT_INDEX = 2
 STRING_TO_LABEL = str2lab_am1
 STRING_TO_FEATURE_ARRAY = str2featarr_am1
 ALL_LABELS = amazon_polarity_labels
-<<<<<<< HEAD
 MODEL_SAVE_NAME = "model0.ckpt"
-=======
->>>>>>> e33b4f466904e4ac0843fba3086e015028cef33c
 
 ### OPTIMIZATION 
 BATCH_SIZE = 128
@@ -221,11 +218,8 @@ def main():
     train_data_file = open(DATA_FILE, 'r')
     csv_reader = csv.reader(train_data_file)
 
-<<<<<<< HEAD
     saver = tf.train.Saver()
 
-=======
->>>>>>> e33b4f466904e4ac0843fba3086e015028cef33c
     for i in range(NUM_ITERS):
 
         label_batch_list = list()
@@ -259,12 +253,8 @@ def main():
         print("step %d, training accuracy %g"%(i, train_accuracy))
         train_step.run(session = sess, feed_dict = train_dict)
 
-<<<<<<< HEAD
         if i%100 == 0:
             saver.save(sess, './saved_models/'+ MODEL_SAVE_NAME)
             print("Model saved in {}.".format('./saved_models/'+ MODEL_SAVE_NAME))
-
-=======
->>>>>>> e33b4f466904e4ac0843fba3086e015028cef33c
 
     sess.close()
