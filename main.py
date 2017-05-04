@@ -15,7 +15,6 @@ from utilities import amazon_polarity_labels, str2featarr_am1, str2lab_am1
 CHAR_SET = default_char_set
 ###
 
-#ONE OF THE FOLLOWING MUST BE SET
 DATA_FILE = "./data/amazon_polarity/train.csv"
 LABEL_INDEX = 0
 TEXT_INDEX = 2
@@ -23,7 +22,7 @@ STRING_TO_LABEL = str2lab_am1
 STRING_TO_FEATURE_ARRAY = str2featarr_am1
 ALL_LABELS = amazon_polarity_labels
 MODEL_SAVE_PATH = "./saved_models/model0.ckpt"
-STARTING_MODEL_PATH = None #"./saved_models/model0.ckpt"
+STARTING_MODEL_PATH = "./saved_models/model0.ckpt"
 
 ### OPTIMIZATION 
 BATCH_SIZE = 128
@@ -221,6 +220,7 @@ def main():
 
     saver = tf.train.Saver()
 
+    #Load saved model
     if STARTING_MODEL_PATH:
         saver.restore(sess, STARTING_MODEL_PATH)
         print("Starting from model in {}.".format(STARTING_MODEL_PATH))
@@ -258,6 +258,7 @@ def main():
         print("step %d, training accuracy %g"%(i, train_accuracy))
         train_step.run(session = sess, feed_dict = train_dict)
 
+        #Periodically save contents of variables
         if i%100 == 0:
             saver.save(sess, MODEL_SAVE_PATH)
             print("Model saved in {}.".format(MODEL_SAVE_PATH))
