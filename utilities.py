@@ -47,7 +47,7 @@ def str2lab_am1(s):
     return s
 
 def str2featarr_am1(sent_string, char_set, sent_max_len = 512):
-    #text to data array 1 (with gutenberg in mind)
+
     sent_string = sent_string.lower()
 
     orig_chars_reg = sent_string[:sent_max_len] + " "*(sent_max_len - len(sent_string))
