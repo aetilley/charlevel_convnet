@@ -209,39 +209,44 @@ def main(start_with_saved = True):
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 
-    #RUN MODEL
-    sess = tf.Session()
+    iteration = tf.Variable(0)
+    increment_iteration = tf.assign_add(iteration, 1)
 
-    sess.run(tf.global_variables_initializer())
+
+    #RUN MODEL    
+
+    sess = tf.Session()
 
     train_data_file = open(DATA_FILE, 'r')
     csv_reader = csv.reader(train_data_file)
 
     saver = tf.train.Saver()
 
+    sess.run(tf.global_variables_initializer())
+
     #Load saved model
+
     if start_with_saved:
         saver.restore(sess, STARTING_MODEL_PATH)
         print("Starting from model in {}.".format(STARTING_MODEL_PATH))
 
-    for i in range(NUM_ITERS):
+    start = iteration.eval(session = sess)
+    print("Starting at iteration {}.".format(start))
+
+    for i in range(start, NUM_ITERS):
 
         label_batch_list = list()
         feature_batch_list = list()
 
         #Get next batch
-
         for _ in range(BATCH_SIZE):
-
             try:
                 next_list = csv_reader.next()
-
             except StopIteration:
                 train_data_file.close()
                 train_data_file = open(DATA_FILE, 'r')
                 csv_reader = csv.reader(train_data_file)
                 next_list = csv_reader.next()
-
             label_batch_list.append(next_list[LABEL_INDEX])
             feature_batch_list.append(next_list[TEXT_INDEX])
 
@@ -256,6 +261,7 @@ def main(start_with_saved = True):
         train_accuracy = accuracy.eval(session = sess, feed_dict = eval_dict)
         print("step %d, training accuracy %g"%(i, train_accuracy))
         train_step.run(session = sess, feed_dict = train_dict)
+        sess.run(increment_iteration)
 
         #Periodically save contents of variables
         if i%100 == 0:
