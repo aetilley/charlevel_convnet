@@ -23,7 +23,7 @@ STRING_TO_LABEL = str2lab_am1
 STRING_TO_FEATURE_ARRAY = str2featarr_am1
 ALL_LABELS = amazon_polarity_labels
 MODEL_SAVE_PATH = "./saved_models/model0.ckpt"
-STARTING_MODEL_PATH = "./saved_models/model0.ckpt"
+STARTING_MODEL_PATH = None #"./saved_models/model0.ckpt"
 
 ### OPTIMIZATION 
 BATCH_SIZE = 128
