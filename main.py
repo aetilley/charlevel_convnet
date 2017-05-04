@@ -22,7 +22,8 @@ TEXT_INDEX = 2
 STRING_TO_LABEL = str2lab_am1
 STRING_TO_FEATURE_ARRAY = str2featarr_am1
 ALL_LABELS = amazon_polarity_labels
-MODEL_SAVE_NAME = "model0.ckpt"
+MODEL_SAVE_PATH = "./saved_models/model0.ckpt"
+STARTING_MODEL_PATH = "./saved_models/model0.ckpt"
 
 ### OPTIMIZATION 
 BATCH_SIZE = 128
@@ -220,6 +221,10 @@ def main():
 
     saver = tf.train.Saver()
 
+    if STARTING_MODEL_PATH:
+        saver.restore(sess, STARTING_MODEL_PATH)
+        print("Starting from model in {}.".format(STARTING_MODEL_PATH))
+
     for i in range(NUM_ITERS):
 
         label_batch_list = list()
@@ -254,7 +259,7 @@ def main():
         train_step.run(session = sess, feed_dict = train_dict)
 
         if i%100 == 0:
-            saver.save(sess, './saved_models/'+ MODEL_SAVE_NAME)
-            print("Model saved in {}.".format('./saved_models/'+ MODEL_SAVE_NAME))
+            saver.save(sess, MODEL_SAVE_PATH)
+            print("Model saved in {}.".format(MODEL_SAVE_PATH))
 
     sess.close()
