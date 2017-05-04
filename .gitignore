@@ -1,2 +1,3 @@
 *~
 /data/amazon_polarity/*.csv
+/saved_models/*.ckpt.*
