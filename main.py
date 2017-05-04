@@ -40,7 +40,7 @@ CONN_NUM_FEATS = 512
 DROPOUT_PROB = .5
 
 
-def main():
+def main(start_with_saved = True):
 
     CHAR_SET_SIZE = len(CHAR_SET)
     NUM_LABELS = len(ALL_LABELS)
@@ -195,8 +195,7 @@ def main():
     readout_weights = weight_variables([CONN_NUM_FEATS, NUM_LABELS])
     readout_bias = bias_variables([NUM_LABELS])
     readout = tf.matmul(in5, readout_weights) + readout_bias
-    thresh_readout = tf.nn.softmax(readout)
-    out5 = thresh_readout
+    out5 = readout
 
 
     # Error and Optimizer
@@ -221,7 +220,7 @@ def main():
     saver = tf.train.Saver()
 
     #Load saved model
-    if STARTING_MODEL_PATH:
+    if start_with_saved:
         saver.restore(sess, STARTING_MODEL_PATH)
         print("Starting from model in {}.".format(STARTING_MODEL_PATH))
 
