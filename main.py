@@ -249,14 +249,19 @@ def main(start_with_saved = True):
             label_batch_list.append(next_list[LABEL_INDEX])
             feature_batch_list.append(next_list[TEXT_INDEX])
 
+        #Process batch
         label_batch_list = [one_hot(STRING_TO_LABEL(s), ALL_LABELS) for s in label_batch_list]
         feature_batch_list = [STRING_TO_FEATURE_ARRAY(s, CHAR_SET, INPUT_WIDTH) for s in feature_batch_list]
-
+        
+        #To numpy array
         label_batch = np.array(label_batch_list)
         feature_batch = np.array(feature_batch_list)
+
+        #Feed dicts
         eval_dict =  {x: feature_batch, y: label_batch, dropout_prob: 1.}
         train_dict = {x: feature_batch, y: label_batch, dropout_prob: DROPOUT_PROB}
 
+        #Do it
         train_accuracy = accuracy.eval(session = sess, feed_dict = eval_dict)
         print("step %d, training accuracy %g"%(i, train_accuracy))
         train_step.run(session = sess, feed_dict = train_dict)
