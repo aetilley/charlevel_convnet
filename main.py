@@ -20,8 +20,6 @@ TEXT_INDEX = 2
 STRING_TO_LABEL = str2lab_am1
 STRING_TO_FEATURE_ARRAY = str2featarr_am1
 ALL_LABELS = amazon_polarity_labels
-MODEL_SAVE_PATH = "./saved_models/model0.ckpt"
-STARTING_MODEL_PATH = "./saved_models/model0.ckpt"
 
 ### OPTIMIZATION 
 BATCH_SIZE = 128
@@ -39,7 +37,7 @@ CONN_NUM_FEATS = 512
 DROPOUT_PROB = .5
 
 
-def main(start_with_saved = True):
+def main(start_path = None,  save_path = None):
 
     CHAR_SET_SIZE = len(CHAR_SET)
     NUM_LABELS = len(ALL_LABELS)
@@ -225,9 +223,9 @@ def main(start_with_saved = True):
 
     #Load saved model
 
-    if start_with_saved:
-        saver.restore(sess, STARTING_MODEL_PATH)
-        print("Starting from model in {}.".format(STARTING_MODEL_PATH))
+    if start_path:
+        saver.restore(sess, start_path)
+        print("Starting from model in {}.".format(start_path))
 
     start = iteration.eval(session = sess)
     print("Starting at iteration {}.".format(start))
@@ -269,7 +267,7 @@ def main(start_with_saved = True):
 
         #Periodically save contents of variables
         if i%100 == 0:
-            saver.save(sess, MODEL_SAVE_PATH)
-            print("Model saved in {}.".format(MODEL_SAVE_PATH))
+            saver.save(sess, save_path)
+            print("Model saved in {}.".format(save_path))
 
     sess.close()
